@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Demo</title>
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width" />
+<base href="/" />
+<link rel="stylesheet" type="text/css"
+    href="/webjars/bootstrap/css/bootstrap.min.css" />
+<script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+    src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h1>Charter Code Challenge</h1>
+    <div class="container unauthenticated">
+        With GitHub: <a href="/oauth2/authorization/github">click here</a>
+    </div>
+    <div class="container authenticated" style="display: none">
+        Logged in as: <span id="user"></span><br>
+        <p>
+        	<button onclick="getAllPosts()">GET /posts</button>
+        	<p id="allPosts"></p>
+         </p>
+        <p>
+        	<button onclick="getFirstPost()">GET /posts/1</button>
+         	<p id="firstPost"></p>
+        </p>
+        <p>
+        	<button onclick="getAllComments()">GET /posts/1/comments</button>
+         	<p id="allComments"></p>
+        </p>
+        <p>
+        	<button onclick="getPostIdComments()">GET /comments?postId=1</button>
+         	<p id="postIdComments"></p>
+        </p>
+        <p>
+        	<button onclick="getUserIdPosts()">GET /posts?userId=1</button>
+         	<p id="userIdPosts"></p>
+        </p><br>
+        <p>
+        	<h4>POST /posts</h4>
+    			<!-- 
+			<form method="post" action="postPosts()">
+    			<p>Enter User Id : <input type="text" name="userId"/></p>
+    			<p>Enter Title: <input type="text" name="title"/></p>
+    			<p>Enter Body:  <textarea name="body" rows="4" cols="50"></textarea></p>
+    			<p><input type="submit" value="POST /posts"></p>
+			</form> 
+			    -->
+			      
+			<form method="post" action="/posts">
+    			<label>Enter User Id : <input type="text" name="userId"/></label><br>
+    			<label>Enter Title   : <input type="text" name="title"/></label><br>
+    			<label>Enter Body    : <input type="text" name="body"/></label><br>
+    			<button>Submit</button><br>
+			</form>  
+		</p><br>
+        <p>
+        	<h4>PUT /posts/1</h4>
+			<form method="post" action="/posts/1">
+    			<p>Enter Post Id : <input type="text" name="postId"/></p>
+    			<p>Enter User Id : <input type="text" name="userId"/></p>
+    			<p>Enter Title: <input type="text" name="title"/></p>
+    			<p>Enter Body:  <textarea name="body" rows="4" cols="50"></textarea></p>
+    			<p><input type="submit" value="PUT /posts/1"></p><br>
+			</form>        
+		</p><br>
+        <p>
+        	<h4>PATCH /posts/1</h4>
+			<form method="post" action="/posts/1">
+    			<p>Enter Post Id : <input type="text" name="postId"/></p>
+    			<p>Enter User Id : <input type="text" name="userId"/></p>
+    			<p>Enter Title: <input type="text" name="title"/></p>
+    			<p>Enter Body:  <textarea name="body" rows="4" cols="50"></textarea></p>
+    			<p><input type="submit" value="PATCH /posts/1"></p><br>
+			</form>        
+		</p><br>
+        <p>
+        	<h4>DELETE /posts/1</h4>
+			<form method="post" action="/posts/1">
+    			<p>Enter Post Id : <input type="text" name="postId"/></p>
+    			<p><input type="submit" value="DELETE /posts/1"></p><br>
+			</form>        
+		</p>
+        <p>
+            <button onClick="logout()" class="btn btn-primary">Logout</button>
+        </p>
+    </div>
+    <script type="text/javascript"
+    src="/webjars/js-cookie/js.cookie.js"></script>
+    <script type="text/javascript">
+          $
+              .ajaxSetup({
+                beforeSend : function(xhr, settings) {
+                  if (settings.type == 'POST' || settings.type == 'PUT'
+                      || settings.type == 'DELETE') {
+                    if (!(/^http:.*/.test(settings.url) || /^https:.*/
+                        .test(settings.url))) {
+                      // Only send the token to relative URLs i.e. locally.
+                      xhr.setRequestHeader("X-XSRF-TOKEN",
+                          Cookies.get('XSRF-TOKEN'));
+                    }
+                  }
+                }
+              });
+          
+          $.get("/user", function(data) {
+            $("#user").html(data.name);
+            $(".unauthenticated").hide();
+            $(".authenticated").show();
+          });
+          
+          var getAllPosts = function() {
+              $.get("/posts", function(data) {
+        	  	console.log(data);				
+          	  	var row = $('<table id="table1"><tr><th>UserId</th><th>Title</th><th>Body</th></tr>');
+      		  	$('#allPosts').append(row);
+        	  	data = JSON.parse(data);
+        	  	data.forEach(function(item) {
+        		  let row = $('<tr>');
+        		  row.append($('<td>').html(item.userId));
+        		  row.append($('<td>').html(item.title));
+        		  row.append($('<td>').html(item.body));
+        		  row.append($('</tr>'));
+        		  $('#table1').append(row);
+        	  	})
+        	  	$('#table1').append('</table>');
+              })
+          }
+             	  
+          var getFirstPost = function() {
+              $.get("/posts/1", function(data) {
+        	  	console.log(data);				
+          	  	var row = $('<table id="table2"><tr><th>UserId</th><th>Title</th><th>Body</th></tr>');
+      		  	$('#firstPost').append(row);
+         	  	data = JSON.parse(data);
+        		row = $('<tr>');
+        		row.append($('<td>').html(data.userId));
+        		row.append($('<td>').html(data.title));
+        		row.append($('<td>').html(data.body));
+        		row.append($('</tr></table>'));
+        		$('#table2').append(row);
+               })
+          }
+
+          var getAllComments = function() {
+              $.get("/posts/1/comments", function(data) {
+        	  	console.log(data);	
+        	  	var row = $('<table id="table3"><tr><th>PostId</th><th>Name</th><th>Email</th><th>Body</th></tr>');
+      		  	$('#allComments').append(row);
+        	  	data = JSON.parse(data);
+        	  	data.forEach(function(item) {
+        		  row = $('<tr>');
+        		  row.append($('<td>').html(item.postId));
+        		  row.append($('<td>').html(item.name));
+        		  row.append($('<td>').html(item.email));
+        		  row.append($('<td>').html(item.body));
+        		  row.append($('</tr>'));
+        		  $('#table3').append(row);
+        	  	})
+        	  	$('#table3').append('</table>');
+              })
+          }
+
+          var getPostIdComments = function() {
+              $.get("/comments?postId=1", function(data) {
+        	  	console.log(data);				
+        	  	var row = $('<table id="table4"><tr><th>PostId</th><th>Name</th><th>Email</th><th>Body</th></tr>');
+      		  	$('#postIdComments').append(row);
+        	  	data = JSON.parse(data);
+        	  	data.forEach(function(item) {
+        		  let row = $('<tr>');
+        		  row.append($('<td>').html(item.postId));
+        		  row.append($('<td>').html(item.name));
+           		  row.append($('<td>').html(item.email));
+       		  	  row.append($('<td>').html(item.body));
+        		  row.append($('</tr>'));
+        		  $('#table4').append(row);
+        	  	})
+        	  	$('#table4').append('</table>');
+              })
+          }
+
+          var getUserIdPosts = function() {
+              $.get("/posts?userId=1", function(data) {
+        	  	console.log(data);				
+          	  	var row = $('<table id="table5"><tr><th>UserId</th><th>Title</th><th>Body</th></tr>');
+      		  	$('#userIdPosts').append(row);
+        	  	data = JSON.parse(data);
+        	  	data.forEach(function(item) {
+        		  row = $('<tr>');
+        		  row.append($('<td>').html(item.userId));
+        		  row.append($('<td>').html(item.title));
+       		  	  row.append($('<td>').html(item.body));
+        		  row.append($('</tr>'));
+        		  $('#table5').append(row);
+        	  	})
+        	  	$('#table5').append('</table>');
+              })
+          }
+		  
+          var postPosts = function() {
+        	  console.log("Im in postPosts");
+        	  $.post("/posts", function(data) {
+        		  console.log(data);
+        	  })
+          }
+          
+          var logout = function() {
+            $.post("/logout", function() {
+              $("#user").html('');
+              $(".unauthenticated").show();
+              $(".authenticated").hide();
+            })
+            return true;
+          }
+        </script>
+</body>
+</html>
